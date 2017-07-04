@@ -314,7 +314,7 @@ module.exports = function(Chart) {
 	// it extends bar (like pie extends doughnut)
 	Chart.defaults.horizontalBar = {
 		hover: {
-			mode: 'label'
+			mode: 'index-y'
 		},
 
 		scales: {
@@ -361,7 +361,8 @@ module.exports = function(Chart) {
 					var datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
 					return datasetLabel + ': ' + tooltipItem.xLabel;
 				}
-			}
+			},
+			mode: 'index-y'
 		}
 	};
 

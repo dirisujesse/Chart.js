@@ -98,32 +98,37 @@ module.exports = function(Chart) {
 		return nearestItems;
 	}
 
-	function indexMode(chart, e, options) {
-		var position = getRelativePosition(e, chart);
-		var distanceMetric = function(pt1, pt2) {
-			return Math.abs(pt1.x - pt2.x);
-		};
-		var items = options.intersect ? getIntersectItems(chart, position) : getNearestItems(chart, position, false, distanceMetric);
-		var elements = [];
+	function buildIndexMode(distanceMetric) {
+		return function(chart, e, options) {
+			var position = getRelativePosition(e, chart);
+			var items = options.intersect ? getIntersectItems(chart, position) : getNearestItems(chart, position, false, distanceMetric);
+			var elements = [];
 
-		if (!items.length) {
-			return [];
-		}
-
-		chart.data.datasets.forEach(function(dataset, datasetIndex) {
-			if (chart.isDatasetVisible(datasetIndex)) {
-				var meta = chart.getDatasetMeta(datasetIndex),
-					element = meta.data[items[0]._index];
-
-				// don't count items that are skipped (null data)
-				if (element && !element._view.skip) {
-					elements.push(element);
-				}
+			if (!items.length) {
+				return [];
 			}
-		});
 
-		return elements;
+			chart.data.datasets.forEach(function(dataset, datasetIndex) {
+				if (chart.isDatasetVisible(datasetIndex)) {
+					var meta = chart.getDatasetMeta(datasetIndex),
+						element = meta.data[items[0]._index];
+
+					// don't count items that are skipped (null data)
+					if (element && !element._view.skip) {
+						elements.push(element);
+					}
+				}
+			});
+
+			return elements;
+		};
 	}
+	var indexMode = buildIndexMode(function(pt1, pt2) {
+		return Math.abs(pt1.x - pt2.x);
+	});
+	var indexYMode = buildIndexMode(function(pt1, pt2) {
+		return Math.abs(pt1.y - pt2.y);
+	});
 
 	/**
 	 * @interface IInteractionOptions
@@ -174,6 +179,19 @@ module.exports = function(Chart) {
 			 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
 			 */
 			index: indexMode,
+
+			/**
+			 * Returns items at the same label along the Y axis
+			 * If the options.intersect parameter is true, we only return items if we intersect something
+			 * If the options.intersect mode is false, we find the nearest item and return the items at the same index as that item
+			 * @function Chart.Interaction.modes.index-y
+			 * @since v2.7.0
+			 * @param chart {chart} the chart we are returning items from
+			 * @param e {Event} the event we are find things at
+			 * @param options {IInteractionOptions} options to use during interaction
+			 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+			 */
+			'index-y': indexYMode,
 
 			/**
 			 * Returns items in the same dataset. If the options.intersect parameter is true, we only return items if we intersect something
