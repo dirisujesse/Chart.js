@@ -8,7 +8,9 @@
 /node_modules
 .DS_Store
 .idea
-.vscode
 bower.json
 *.log
 *.swp
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
